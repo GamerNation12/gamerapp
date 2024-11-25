@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "453268896795",
+    "project_id": "gamer-app-70fe8",
+    "storage_bucket": "gamer-app-70fe8.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:453268896795:android:489a8bff1aa4cb13f40cbe",
+        "android_client_info": {
+          "package_name": "com.example.gamerapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "453268896795-4731s0v8pvjhuludjf13hfgaeg7ui6uo.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyADs8C3yVZNvAeDKIQXhnaHYkRaL-mmX8E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "453268896795-4731s0v8pvjhuludjf13hfgaeg7ui6uo.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
