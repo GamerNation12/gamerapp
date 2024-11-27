@@ -10,9 +10,9 @@
               <option name="connection">
                 <ConnectionSetting>
                   <option name="appId" value="com.example.gamerapp" />
-                  <option name="mobileSdkAppId" value="1:453268896795:android:489a8bff1aa4cb13f40cbe" />
-                  <option name="projectId" value="gamer-app-70fe8" />
-                  <option name="projectNumber" value="453268896795" />
+                  <option name="mobileSdkAppId" value="1:276669851212:android:04d5e5289e59d7d98136e9" />
+                  <option name="projectId" value="gamer-app-10a85" />
+                  <option name="projectNumber" value="276669851212" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />

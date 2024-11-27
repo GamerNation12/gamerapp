@@ -10,7 +10,17 @@
 
     
 
+    <queries>
+
+        <package android:name="com.roblox.client" />
+
+    </queries>
+
+    
+
     <application
+
+        android:name=".GamerApplication"
 
         android:allowBackup="true"
 
