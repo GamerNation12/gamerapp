@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html data-theme="dark">
+<html>
 <head>
     <title>Gamer App Chat</title>
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
@@ -7,309 +7,304 @@
     <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
-    <link rel="stylesheet" href="/styles/theme.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <script src="/config/secure.js"></script>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <style>
         :root {
-            --bg-color: #1a1a1a;
-            --card-bg: #2d2d2d;
-            --text-color: #ffffff;
-            --text-secondary: #a0a0a0;
-            --accent-color: #2196f3;
-            --input-bg: #3d3d3d;
-            --input-border: #4d4d4d;
-            --input-text: #ffffff;
-            --shadow-color: rgba(0, 0, 0, 0.2);
+            --bg-color: #121212;
+            --message-own: #2196f3;
+            --message-other: #ffffff;
         }
 
         body {
-            background-color: var(--bg-color);
-            color: var(--text-color);
             margin: 0;
-            padding: 20px;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            min-height: 100vh;
+            padding: 0;
+            background: var(--bg-color);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             display: flex;
             flex-direction: column;
-            align-items: center;
+            height: 100vh;
         }
 
+        #user-info {
+            padding: 16px;
+            background: #1e1e1e;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #2d2d2d;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        #current-username {
+            font-size: 20px;
+            color: white;
+            font-weight: 500;
+        }
+
+        #chat-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        #messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            background: var(--bg-color);
+            scroll-behavior: smooth;
+        }
+
+        .message {
+            margin: 4px 0;
+            padding: 12px 16px;
+            border-radius: 20px;
+            max-width: 75%;
+            font-size: 15px;
+            line-height: 1.4;
+            position: relative;
+        }
+
+        .message.own {
+            background: var(--message-own);
+            margin-left: auto;
+            border-bottom-right-radius: 4px;
+            color: white;
+        }
+
+        .message.other {
+            background: var(--message-other);
+            margin-right: auto;
+            border-bottom-left-radius: 4px;
+            color: white;
+        }
+
+        .sender {
+            font-size: 13px;
+            color: white;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .platform-tag {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.7);
+            background: rgba(255, 255, 255, 0.1);
+            padding: 2px 8px;
+            border-radius: 12px;
+        }
+
+        .time {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.6);
+            margin-top: 4px;
+            text-align: right;
+        }
+
+        #input-area {
+            padding: 12px 16px;
+            background: #1e1e1e;
+            border-top: 1px solid #2d2d2d;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            position: sticky;
+            bottom: 0;
+        }
+
+        #message-input {
+            flex: 1;
+            padding: 12px 16px;
+            border-radius: 24px;
+            border: none;
+            background: #2d2d2d;
+            color: white;
+            font-size: 15px;
+        }
+
+        #message-input::placeholder {
+            color: #888;
+        }
+
+        .send-button {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--message-own);
+            border: none;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 20px;
+            padding: 0;
+        }
+
+        #messages::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        #messages::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+        }
+
+        #messages::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        /* Login page styles */
         #login-area {
-            width: 100%;
-            max-width: 400px;
-            margin: 40px auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: var(--bg-color);
         }
 
         .login-container {
-            background: var(--card-bg);
-            padding: 32px;
+            background: #1e1e1e;
+            padding: 24px;
             border-radius: 16px;
-            box-shadow: 0 4px 24px var(--shadow-color);
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
         }
 
         .login-container h2 {
-            margin: 0 0 24px 0;
+            color: white;
             text-align: center;
-            color: var(--text-color);
+            margin: 0 0 24px 0;
             font-size: 24px;
         }
 
-        .login-tabs {
-            display: flex;
-            margin-bottom: 24px;
-            border-bottom: 2px solid var(--input-border);
-        }
-
-        .login-tab {
-            flex: 1;
-            padding: 12px;
-            background: none;
-            border: none;
-            color: var(--text-secondary);
-            cursor: pointer;
-            font-size: 16px;
-            transition: all 0.3s ease;
-        }
-
-        .login-tab.active {
-            color: var(--accent-color);
-            border-bottom: 2px solid var(--accent-color);
-            margin-bottom: -2px;
-        }
-
-        .login-input {
-            width: 100%;
-            padding: 12px;
-            margin-bottom: 16px;
-            background: var(--input-bg);
-            border: 2px solid var(--input-border);
-            border-radius: 8px;
-            color: var(--input-text);
-            font-size: 16px;
-            transition: all 0.3s ease;
-            box-sizing: border-box;
-        }
-
-        .login-input:focus {
-            border-color: var(--accent-color);
-            outline: none;
-            box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.1);
-        }
-
-        .login-button {
-            width: 100%;
-            padding: 12px;
-            background: var(--accent-color);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-
-        .login-button:hover {
-            background: #1976d2;
-            transform: translateY(-1px);
-        }
-
-        .login-button:active {
-            transform: translateY(0);
-        }
-
-        #user-login-form, #admin-login-form {
+        #user-login-form {
             display: flex;
             flex-direction: column;
             gap: 16px;
         }
 
-        #messages {
-            background: var(--card-bg);
-            border: 1px solid var(--input-border);
-        }
-
-        .message {
-            background: var(--message-bg);
-            margin: 8px 0;
-            padding: 12px;
+        .login-input {
+            padding: 12px 16px;
             border-radius: 12px;
-            max-width: 80%;
-        }
-
-        .message.own {
-            background: var(--message-own-bg);
-            margin-left: auto;
-            margin-right: 0;
-        }
-
-        .message.other {
-            background: var(--message-other-bg);
-            margin-right: auto;
-            margin-left: 0;
-        }
-
-        .sender {
-            font-weight: 600;
-            margin-bottom: 4px;
-            color: rgba(255, 255, 255, 0.9);
-        }
-
-        .time {
-            font-size: 12px;
-            color: rgba(255, 255, 255, 0.7);
-            margin-top: 4px;
-        }
-
-        #admin-panel {
-            background: var(--card-bg);
-            border-color: #dc3545;
-        }
-
-        #admin-panel button {
-            background: #dc3545;
-        }
-
-        #admin-panel button:hover {
-            background: #c82333;
-        }
-
-        #chat-area {
-            max-width: 800px;
-            margin: 20px auto;
-        }
-
-        #messages {
-            height: 500px;
-            overflow-y: auto;
-            padding: 20px;
-            background: var(--card-bg);
-            border-radius: 12px;
-            margin-bottom: 20px;
-        }
-
-        #input-area {
-            display: flex;
-            gap: 10px;
-        }
-
-        #message-input {
-            flex: 1;
-            padding: 12px;
-            border: 2px solid var(--input-border);
-            border-radius: 8px;
-            background: var(--input-bg);
-            color: var(--input-text);
-        }
-
-        button {
-            padding: 12px 24px;
-            background: var(--accent-color);
+            border: 1px solid #2d2d2d;
+            background: #2d2d2d;
             color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            box-sizing: border-box;
         }
 
-        #user-info {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        .login-input:focus {
+            outline: none;
+            border-color: var(--message-own);
+        }
+
+        .login-button {
             padding: 12px;
-            background: var(--card-bg);
-            border-radius: 8px;
-            margin-bottom: 20px;
-        }
-
-        .message {
-            margin: 8px 0;
-            padding: 12px;
-            border-radius: 8px;
-            background: var(--message-bg);
-        }
-
-        .message.own {
-            background: var(--message-own-bg);
-            margin-left: 20%;
-        }
-
-        .message.other {
-            background: var(--message-other-bg);
-            margin-right: 20%;
-        }
-
-        #admin-panel {
-            margin: 20px auto;
-            padding: 20px;
-            background: var(--card-bg);
             border-radius: 12px;
-            border: 2px solid #dc3545;
-            max-width: 800px;
-        }
-
-        #admin-panel button {
-            margin: 5px;
-            background: #dc3545;
-        }
-
-        .theme-toggle {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 8px;
-            border-radius: 50%;
-            background: var(--card-bg);
             border: none;
+            background: var(--message-own);
+            color: white;
+            font-size: 16px;
+            font-weight: 500;
             cursor: pointer;
-            z-index: 1000;
+            transition: background 0.2s;
+        }
+
+        .login-button:hover {
+            background: #1976d2;
+        }
+
+        .login-input::placeholder {
+            color: #888;
+        }
+
+        /* Admin panel styles */
+        #admin-panel {
+            padding: 12px;
+            background: #1e1e1e;
+            border-bottom: 1px solid #2d2d2d;
+        }
+
+        .admin-controls {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .admin-btn {
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: none;
+            background: #2d2d2d;
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .admin-btn:hover {
+            background: #3d3d3d;
+        }
+
+        .typing-indicator {
+            padding: 8px 12px;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 12px;
+            font-style: italic;
+        }
+
+        .message-content {
+            opacity: 1;
+            transition: opacity 0.3s ease;
+        }
+
+        .message-content.expired {
+            opacity: 0.5;
         }
     </style>
 </head>
 <body>
-    <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
-        <span id="theme-icon">🌙</span>
-    </button>
+    <div id="user-info" style="display: none;">
+        <div class="header">
+            <h1>Chat Room</h1>
+            <div class="user-controls">
+                <span id="current-username"></span>
+                <button onclick="editUsername()" class="edit-btn">✏️</button>
+                <button onclick="logout()" class="logout-btn">Logout</button>
+            </div>
+        </div>
+    </div>
 
-    <!-- Add admin panel -->
     <div id="admin-panel" style="display: none;">
-        <h3>Admin Panel</h3>
-        <button onclick="clearAllMessages()">Clear All Messages</button>
-        <button onclick="banUser()">Ban User</button>
-        <button onclick="unbanUser()">Unban User</button>
-        <button onclick="toggleMaintenance()" id="maintenance-btn">Enable Maintenance Mode</button>
+        <div class="admin-controls">
+            <button onclick="clearAllMessages()" class="admin-btn">Clear All Messages</button>
+            <button onclick="banUser()" class="admin-btn">Ban User</button>
+            <button onclick="unbanUser()" class="admin-btn">Unban User</button>
+            <button onclick="toggleMaintenance()" id="maintenance-btn" class="admin-btn">Enable Maintenance Mode</button>
+        </div>
     </div>
 
     <div id="chat-area" style="display: none;">
         <div id="messages"></div>
         <div id="input-area">
-            <button class="gif-button" onclick="toggleGifPicker()">🎭</button>
             <input type="text" id="message-input" placeholder="Type your message...">
-            <button onclick="sendMessage()">Send</button>
-            
-            <!-- Move GIF picker here -->
-            <div id="gif-picker" class="gif-picker">
-                <input type="text" 
-                       class="gif-search" 
-                       placeholder="Search GIFs..."
-                       oninput="searchGifs(this.value)">
-                <div class="gif-results" id="gif-results"></div>
-            </div>
+            <button onclick="sendMessage()" class="send-button">➤</button>
         </div>
-    </div>
-
-    <div id="user-info" style="display: none;">
-        <span id="current-username"></span>
-        <button onclick="logout()">Logout</button>
+        <div id="typing-indicator" class="typing-indicator"></div>
     </div>
 
     <div id="login-area">
         <div class="login-container">
-            <h2>Login</h2>
-            <div class="login-tabs">
-                <button onclick="showUserLogin()" class="login-tab active" id="user-tab">Login</button>
-            </div>
-            
+            <h2>Chat Room</h2>
             <div id="user-login-form">
                 <input type="text" 
                        id="username-input" 
@@ -318,38 +313,155 @@
                        autocomplete="off">
                 <button onclick="login()" class="login-button">Login</button>
             </div>
-            
-            <div id="admin-login-form" style="display: none;">
-                <input type="text" 
-                       id="admin-username" 
-                       class="login-input" 
-                       placeholder="Admin Username"
-                       autocomplete="off">
-                <input type="password" 
-                       id="admin-password" 
-                       class="login-input" 
-                       placeholder="Admin Password">
-                <button onclick="loginAsAdmin()" class="login-button">Login as Admin</button>
-            </div>
         </div>
     </div>
 
-    <script src="/scripts/theme.js"></script>
     <script>
-        const API_URL = 'https://gamer-app-backend.onrender.com';  // Replace with your actual Render URL
-
+        // Initialize Socket.IO and API connection
         let currentUser = null;
-        let isAdmin = false;
+        const API_URL = 'https://gamer-app-backend.onrender.com';
+        const socket = io(API_URL);
 
-        // Update the login function to use only the API
-        async function login() {
-            const usernameInput = document.getElementById('username-input');
-            if (!usernameInput) {
-                console.error('Username input not found');
+        // Typing indicator variables
+        let typingTimeout;
+        const typingUsers = new Set();
+
+        // Message handling functions
+        async function sendMessage() {
+            const input = document.getElementById('message-input');
+            const messageText = input.value.trim();
+            
+            if (!messageText || !currentUser) return;
+
+            const message = {
+                id: Date.now().toString(),
+                sender: currentUser,
+                content: messageText,
+                timestamp: Date.now(),
+                platform: 'Web'
+            };
+
+            try {
+                const response = await fetch(`${API_URL}/api/messages`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(message)
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to send message');
+                }
+
+                input.value = '';
+                addMessageToUI(message);  // Add this line to show own message immediately
+                socket.emit('newMessage', message);
+            } catch (error) {
+                console.error('Error sending message:', error);
+                alert('Error sending message. Please try again.');
+            }
+        }
+
+        // Load existing messages
+        async function loadMessages() {
+            try {
+                const response = await fetch(`${API_URL}/api/messages`);
+                if (!response.ok) {
+                    throw new Error('Failed to fetch messages');
+                }
+                const messages = await response.json();
+                console.log('Loaded messages:', messages); // Add this debug log
+                
+                const messagesDiv = document.getElementById('messages');
+                messagesDiv.innerHTML = '';
+                
+                if (Array.isArray(messages)) {  // Add this check
+                    messages
+                        .sort((a, b) => a.timestamp - b.timestamp)
+                        .forEach(message => {
+                            if (!message.deleted) {
+                                addMessageToUI(message);
+                            }
+                        });
+
+                    // Scroll to bottom after loading messages
+                    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+                } else {
+                    console.error('Received non-array messages:', messages);
+                }
+            } catch (error) {
+                console.error('Error loading messages:', error);
+            }
+        }
+
+        // Add message to UI
+        function addMessageToUI(message) {
+            console.log('Adding message to UI:', message); // Add this debug log
+            const messagesDiv = document.getElementById('messages');
+            if (!messagesDiv) {
+                console.error('Messages div not found');
                 return;
             }
 
-            const username = usernameInput.value.trim();
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${message.sender === currentUser ? 'own' : 'other'}`;
+            
+            const senderDiv = document.createElement('div');
+            senderDiv.className = 'sender';
+            senderDiv.textContent = message.sender;
+            
+            const platformTag = document.createElement('span');
+            platformTag.className = 'platform-tag';
+            platformTag.textContent = message.platform || 'Web';
+            senderDiv.appendChild(platformTag);
+
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            contentDiv.textContent = message.content;
+
+            const timeDiv = document.createElement('div');
+            timeDiv.className = 'time';
+            timeDiv.textContent = new Date(message.timestamp).toLocaleTimeString();
+
+            messageDiv.appendChild(senderDiv);
+            messageDiv.appendChild(contentDiv);
+            messageDiv.appendChild(timeDiv);
+            messagesDiv.appendChild(messageDiv);
+
+            // Scroll to bottom
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        // Socket.IO event handlers
+        socket.on('connect', () => {
+            console.log('Connected to Socket.IO');
+        });
+
+        socket.on('newMessage', (message) => {
+            console.log('Received new message:', message); // Add this debug log
+            if (message.sender !== currentUser) {
+                addMessageToUI(message);
+            }
+        });
+
+        window.onload = function() {
+            loadSavedUsername();
+        };
+
+        async function loadSavedUsername() {
+            const savedUsername = localStorage.getItem('username');
+            if (savedUsername) {
+                try {
+                    await login(savedUsername);
+                } catch (error) {
+                    console.error('Error auto-logging in:', error);
+                }
+            }
+        }
+
+        async function login(providedUsername) {
+            const username = providedUsername || document.getElementById('username-input').value.trim();
             if (!username) {
                 alert('Please enter a username');
                 return;
@@ -374,15 +486,22 @@
                     throw new Error('Login failed');
                 }
 
-                // Login successful
+                const data = await response.json();
                 currentUser = username;
-                isAdmin = false;
+                // Only set isAdmin if the server confirms it
+                isAdmin = data.isAdmin;
                 
-                // Update UI
                 document.getElementById('login-area').style.display = 'none';
-                document.getElementById('chat-area').style.display = 'block';
+                document.getElementById('chat-area').style.display = 'flex';
                 document.getElementById('user-info').style.display = 'block';
-                document.getElementById('current-username').textContent = `Logged in as: ${username}`;
+                document.getElementById('current-username').textContent = `${username}`;
+                
+                // Only show admin panel if server confirms admin status
+                if (isAdmin) {
+                    document.getElementById('admin-panel').style.display = 'block';
+                } else {
+                    document.getElementById('admin-panel').style.display = 'none';
+                }
                 
                 localStorage.setItem('username', username);
                 loadMessages();
@@ -392,232 +511,212 @@
             }
         }
 
-        // Update loadMessages function to use API
-        async function loadMessages() {
-            try {
-                const response = await fetch(`${API_URL}/api/messages`);
-                const messages = await response.json();
-                
-                const messagesDiv = document.getElementById('messages');
-                messagesDiv.innerHTML = '';
-                
-                Object.values(messages)
-                    .sort((a, b) => a.timestamp - b.timestamp)
-                    .forEach(message => {
-                        if (!message.deleted) {
-                            addMessageToUI(message);
-                        }
-                    });
-            } catch (error) {
-                console.error('Error loading messages:', error);
-            }
-        }
+        // Update the admin login function
+        async function loginAsAdmin() {
+            const username = prompt('Admin Username:');
+            const password = prompt('Admin Password:');
 
-        // Update sendMessage function to use API
-        async function sendMessage() {
-            const input = document.getElementById('message-input');
-            const content = input.value.trim();
-            
-            if (!content || !currentUser) return;
-
-            const message = {
-                id: Date.now().toString(),
-                sender: currentUser,
-                content: content,
-                timestamp: Date.now(),
-                platform: 'Web',
-                reactions: {},
-                deleted: false
-            };
+            if (!username || !password) return;
 
             try {
-                const response = await fetch(`${API_URL}/api/messages`, {
+                const response = await fetch(`${API_URL}/api/login`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify(message)
+                    body: JSON.stringify({ 
+                        username: username,
+                        password: password
+                    })
                 });
 
                 if (!response.ok) {
-                    throw new Error('Failed to send message');
+                    throw new Error('Login failed');
                 }
 
-                input.value = '';
+                const data = await response.json();
+                
+                if (data.isAdmin) {
+                    currentUser = username;
+                    isAdmin = true;
+                    
+                    document.getElementById('login-area').style.display = 'none';
+                    document.getElementById('chat-area').style.display = 'flex';
+                    document.getElementById('user-info').style.display = 'block';
+                    document.getElementById('admin-panel').style.display = 'block';
+                    document.getElementById('current-username').textContent = username;
+                    
+                    localStorage.setItem('username', username);
+                    loadMessages();
+                } else {
+                    alert('Invalid admin credentials');
+                }
             } catch (error) {
-                console.error('Error sending message:', error);
-                alert('Error sending message. Please try again.');
+                console.error('Error logging in as admin:', error);
+                alert('Error logging in as admin');
             }
         }
 
-        // Add message display function
-        function addMessageToUI(message) {
-            const messagesDiv = document.getElementById('messages');
-            if (!messagesDiv) return;
-
-            const messageElement = document.createElement('div');
-            messageElement.id = `message-${message.id}`;
-            messageElement.className = `message ${message.sender === currentUser ? 'own' : 'other'}`;
-            
-            messageElement.innerHTML = `
-                <div class="sender">${message.sender}</div>
-                <div class="content">${message.content}</div>
-                <div class="time">${new Date(message.timestamp).toLocaleTimeString()}</div>
-            `;
-            
-            messagesDiv.appendChild(messageElement);
-            messagesDiv.scrollTop = messagesDiv.scrollHeight;
-        }
-
-        // Add logout function
-        function logout() {
-            if (confirm('Are you sure you want to logout?')) {
-                currentUser = null;
-                isAdmin = false;
-                localStorage.removeItem('username');
-                document.getElementById('login-area').style.display = 'block';
-                document.getElementById('chat-area').style.display = 'none';
-                document.getElementById('user-info').style.display = 'none';
-                document.getElementById('admin-panel').style.display = 'none';
+        // Update the Ctrl+Shift+A handler
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.shiftKey && e.key === 'A') {
+                loginAsAdmin();
             }
-        }
-
-        // Load saved username on page load
-        function loadSavedUsername() {
-            const savedUsername = localStorage.getItem('username');
-            if (savedUsername) {
-                const usernameInput = document.getElementById('username-input');
-                if (usernameInput) {
-                    usernameInput.value = savedUsername;
-                    login();
-                }
-            }
-        }
-
-        document.addEventListener('DOMContentLoaded', function() {
-            // Add click handler for login button
-            const loginButton = document.querySelector('.login-button');
-            if (loginButton) {
-                loginButton.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    login();
-                });
-            }
-
-            // Add keypress handler for username input
-            const usernameInput = document.getElementById('username-input');
-            if (usernameInput) {
-                usernameInput.addEventListener('keypress', function(e) {
-                    if (e.key === 'Enter') {
-                        e.preventDefault();
-                        login();
-                    }
-                });
-            }
-
-            // Load saved username if exists
-            loadSavedUsername();
         });
 
-        // Update the admin login function to use the Cloud Functions URL
-        async function loginAsAdmin() {
-            const username = document.getElementById('admin-username').value;
-            const password = document.getElementById('admin-password').value;
+        function logout() {
+            currentUser = null;
+            localStorage.removeItem('username');
+            document.getElementById('login-area').style.display = 'block';
+            document.getElementById('chat-area').style.display = 'none';
+            document.getElementById('user-info').style.display = 'none';
+        }
 
-            if (!username || !password) {
-                alert('Please enter both username and password');
-                return;
+        document.getElementById('message-input')?.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            } else {
+                emitTyping();
             }
+        });
 
-            if (verifyAdmin(username, password)) {
+        // Add these admin functions
+        async function clearAllMessages() {
+            if (!isAdmin) return;
+            if (confirm('Are you sure you want to clear all messages?')) {
                 try {
-                    const response = await fetch(`${API_URL}/api/login`, {
+                    const response = await fetch(`${API_URL}/api/admin/clear-messages`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
                         },
-                        body: JSON.stringify({ username: `[ADMIN] ${username}` })
+                        body: JSON.stringify({ username: currentUser })
                     });
 
-                    if (!response.ok) {
-                        throw new Error('Login failed');
-                    }
-
-                    // Admin login successful
-                    currentUser = `[ADMIN] ${username}`;
-                    isAdmin = true;
+                    if (!response.ok) throw new Error('Failed to clear messages');
                     
-                    document.getElementById('login-area').style.display = 'none';
-                    document.getElementById('chat-area').style.display = 'block';
-                    document.getElementById('admin-panel').style.display = 'block';
-                    document.getElementById('user-info').style.display = 'block';
-                    document.getElementById('current-username').textContent = `Logged in as: ${currentUser}`;
-                    
-                    localStorage.setItem('username', currentUser);
-                    loadMessages();
-                    checkMaintenanceStatus();
+                    document.getElementById('messages').innerHTML = '';
                 } catch (error) {
-                    console.error('Error logging in as admin:', error);
-                    alert('Error logging in. Please try again.');
-                }
-            } else {
-                alert('Invalid admin credentials');
-            }
-        }
-
-        // Add show/hide login form functions
-        function showUserLogin() {
-            document.getElementById('user-login-form').style.display = 'block';
-            document.getElementById('admin-login-form').style.display = 'none';
-            document.getElementById('user-tab').classList.add('active');
-            const adminTab = document.getElementById('admin-tab');
-            if (adminTab) adminTab.classList.remove('active');
-        }
-
-        function showAdminLogin() {
-            document.getElementById('user-login-form').style.display = 'none';
-            document.getElementById('admin-login-form').style.display = 'block';
-            document.getElementById('user-tab').classList.remove('active');
-            document.getElementById('admin-tab').classList.add('active');
-        }
-
-        // Add admin tab on Ctrl + Shift + A
-        document.addEventListener('keydown', function(e) {
-            if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'a') {
-                e.preventDefault();
-                if (!document.getElementById('admin-tab')) {
-                    const loginTabs = document.querySelector('.login-tabs');
-                    const adminTab = document.createElement('button');
-                    adminTab.className = 'login-tab';
-                    adminTab.id = 'admin-tab';
-                    adminTab.onclick = showAdminLogin;
-                    adminTab.textContent = 'Admin';
-                    loginTabs.appendChild(adminTab);
+                    console.error('Error clearing messages:', error);
+                    alert('Error clearing messages');
                 }
             }
-        });
+        }
 
-        // Add message input event listener
-        document.getElementById('message-input')?.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                sendMessage();
-            }
-        });
+        async function banUser() {
+            if (!isAdmin) return;
+            const username = prompt('Enter username to ban:');
+            if (!username) return;
+            
+            const reason = prompt('Enter ban reason:');
+            if (!reason) return;
 
-        // Add maintenance status check for admin panel
-        async function checkMaintenanceStatus() {
             try {
-                const response = await fetch(`${API_URL}/api/maintenance`);
-                const maintenance = await response.json();
-                const button = document.getElementById('maintenance-btn');
-                if (button) {
-                    button.textContent = maintenance?.enabled ? 
-                        'Disable Maintenance Mode' : 
-                        'Enable Maintenance Mode';
-                }
+                const response = await fetch(`${API_URL}/api/users/ban`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        username,
+                        reason,
+                        bannedBy: currentUser
+                    })
+                });
+
+                if (!response.ok) throw new Error('Failed to ban user');
+                
+                alert(`User ${username} has been banned`);
             } catch (error) {
-                console.error('Error checking maintenance status:', error);
+                console.error('Error banning user:', error);
+                alert('Error banning user');
+            }
+        }
+
+        async function unbanUser() {
+            if (!isAdmin) return;
+            const username = prompt('Enter username to unban:');
+            if (!username) return;
+
+            try {
+                const response = await fetch(`${API_URL}/api/users/ban/${username}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ adminUsername: currentUser })
+                });
+
+                if (!response.ok) throw new Error('Failed to unban user');
+                
+                alert(`User ${username} has been unbanned`);
+            } catch (error) {
+                console.error('Error unbanning user:', error);
+                alert('Error unbanning user');
+            }
+        }
+
+        async function toggleMaintenance() {
+            if (!isAdmin) return;
+            const button = document.getElementById('maintenance-btn');
+            const isEnabled = button.textContent.includes('Disable');
+            
+            try {
+                const response = await fetch(`${API_URL}/api/admin/maintenance`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        username: currentUser,
+                        enabled: !isEnabled,
+                        message: !isEnabled ? prompt('Enter maintenance message:') : ''
+                    })
+                });
+
+                if (!response.ok) throw new Error('Failed to toggle maintenance mode');
+                
+                button.textContent = isEnabled ? 'Enable Maintenance Mode' : 'Disable Maintenance Mode';
+            } catch (error) {
+                console.error('Error toggling maintenance:', error);
+                alert('Error toggling maintenance mode');
+            }
+        }
+
+        function emitTyping() {
+            socket.emit('typing', currentUser);
+            
+            // Clear previous timeout
+            clearTimeout(typingTimeout);
+            
+            // Set new timeout
+            typingTimeout = setTimeout(() => {
+                socket.emit('stopTyping', currentUser);
+            }, 1000);
+        }
+
+        // Add Socket.IO event listeners for typing
+        socket.on('userTyping', (username) => {
+            if (username !== currentUser) {
+                typingUsers.add(username);
+                updateTypingIndicator();
+            }
+        });
+
+        socket.on('userStopTyping', (username) => {
+            typingUsers.delete(username);
+            updateTypingIndicator();
+        });
+
+        function updateTypingIndicator() {
+            const indicator = document.getElementById('typing-indicator');
+            if (typingUsers.size > 0) {
+                const users = Array.from(typingUsers);
+                indicator.textContent = users.length === 1 
+                    ? `${users[0]} is typing...`
+                    : `${users.join(', ')} are typing...`;
+            } else {
+                indicator.textContent = '';
             }
         }
     </script>

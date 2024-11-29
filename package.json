@@ -1,0 +1,26 @@
+// Location: gamer-app-backend/package.json
+// Backend dependencies and scripts
+// Contains:
+// - Project metadata
+// - Dependencies list
+// - Development dependencies
+// - Start and dev scripts
+{
+  "name": "gamer-app-backend",
+  "version": "1.0.0",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "firebase-admin": "^11.5.0",
+    "socket.io": "^4.7.2"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.20"
+  }
+} 
