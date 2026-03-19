@@ -14,11 +14,8 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="bg-orbs">
-        <div class="orb orb-1"></div>
-        <div class="orb orb-2"></div>
-        <div class="orb orb-3"></div>
-    </div>
+    <div id="toast-container"></div>
+    
     <div id="user-info" style="display: none;">
         <div class="header">
             <h1>Chat Room</h1>
@@ -76,6 +73,29 @@
     </audio>
 
     <script>
+
+        function showToast(message, type = 'error') {
+            // Support object/error payloads that shouldn't be stringified directly in showToast(, "error") calls occasionally
+            if (typeof message === 'object') return;
+            
+            let container = document.getElementById('toast-container');
+            if(!container) return;
+            
+            const toast = document.createElement('div');
+            toast.className = 'toast ' + type;
+            toast.textContent = message;
+            container.appendChild(toast);
+            
+            // Trigger reflow for animation
+            void toast.offsetWidth;
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
 
         // Initialize Socket.IO and API connection
         let currentUser = null;
@@ -138,7 +158,7 @@
             if (!messageText || !currentUser) return;
 
             if (messageText.length > 500) {
-                alert('Message is too long (maximum 500 characters).');
+                showToast('Message is too long (maximum 500 characters, "error").');
                 return;
             }
 
@@ -169,7 +189,7 @@
 
                 if (response.status === 429 || response.status === 400) {
                     const data = await response.json();
-                    alert(data.error);
+                    showToast(data.error, "error");
                     return;
                 }
 
@@ -183,7 +203,7 @@
                 socket.emit('newMessage', message);
             } catch (error) {
                 console.error('Error sending message:', error);
-                alert('Error sending message. Please try again.');
+                showToast('Error sending message. Please try again.', "error");
             }
         }
 
@@ -326,7 +346,7 @@
         async function login(providedUsername) {
             const username = providedUsername || document.getElementById('username-input').value.trim();
             if (!username) {
-                alert('Please enter a username');
+                showToast('Please enter a username', "error");
                 return;
             }
 
@@ -341,7 +361,7 @@
 
                 if (response.status === 403) {
                     const banData = await response.json();
-                    alert(`You are banned. Reason: ${banData.reason}`);
+                    showToast(`You are banned. Reason: ${banData.reason}`, "error");
                     return;
                 }
 
@@ -374,7 +394,7 @@
                 loadMessages();
             } catch (error) {
                 console.error('Error logging in:', error);
-                alert('Error logging in: ' + error.message);
+                showToast('Error logging in: ' + error.message, "error");
             }
         }
 
@@ -416,11 +436,11 @@
                     localStorage.setItem('username', username);
                     loadMessages();
                 } else {
-                    alert('Invalid admin credentials');
+                    showToast('Invalid admin credentials', "error");
                 }
             } catch (error) {
                 console.error('Error logging in as admin:', error);
-                alert('Error logging in as admin');
+                showToast('Error logging in as admin', "error");
             }
         }
 
@@ -466,7 +486,7 @@
                     document.getElementById('messages').innerHTML = '';
                 } catch (error) {
                     console.error('Error clearing messages:', error);
-                    alert('Error clearing messages');
+                    showToast('Error clearing messages', "error");
                 }
             }
         }
@@ -494,10 +514,10 @@
 
                 if (!response.ok) throw new Error('Failed to ban user');
                 
-                alert(`User ${username} has been banned`);
+                showToast(`User ${username} has been banned`, "error");
             } catch (error) {
                 console.error('Error banning user:', error);
-                alert('Error banning user');
+                showToast('Error banning user', "error");
             }
         }
 
@@ -517,10 +537,10 @@
 
                 if (!response.ok) throw new Error('Failed to unban user');
                 
-                alert(`User ${username} has been unbanned`);
+                showToast(`User ${username} has been unbanned`, "error");
             } catch (error) {
                 console.error('Error unbanning user:', error);
-                alert('Error unbanning user');
+                showToast('Error unbanning user', "error");
             }
         }
 
@@ -547,7 +567,7 @@
                 button.textContent = isEnabled ? 'Enable Maintenance Mode' : 'Disable Maintenance Mode';
             } catch (error) {
                 console.error('Error toggling maintenance:', error);
-                alert('Error toggling maintenance mode');
+                showToast('Error toggling maintenance mode', "error");
             }
         }
 
@@ -603,7 +623,7 @@
                 socket.emit('deleteMessage', id);
             } catch (error) {
                 console.error('Error deleting message:', error);
-                alert('Could not delete message. Make sure backend has finished updating.');
+                showToast('Could not delete message. Make sure backend has finished updating.', "error");
             }
         }
     </script>
