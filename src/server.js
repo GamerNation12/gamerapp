@@ -20,11 +20,12 @@ const server = http.createServer(app);
 // Update Socket.IO configuration to handle CORS
 const io = require('socket.io')(server, {
     cors: {
-        origin: ['https://gamer-app-10a85.web.app', 'https://gamer-app-backend.onrender.com'],
+        origin: ['https://gamer-chat-23709.web.app', 'https://gamer-app-backend.onrender.com'],
         methods: ['GET', 'POST'],
         credentials: true
     }
 });
+
 
 // In-memory storage for users only
 const bannedUsers = new Map();
@@ -38,10 +39,11 @@ console.log('Starting server...');
 
 // Middleware first
 app.use(cors({
-    origin: ['https://gamer-app-10a85.web.app', 'https://gamer-app-backend.onrender.com'],
+    origin: ['https://gamer-chat-23709.web.app', 'https://gamer-app-backend.onrender.com'],
     methods: ['GET', 'POST'],
     credentials: true
 }));
+
 
 app.use(express.json());
 

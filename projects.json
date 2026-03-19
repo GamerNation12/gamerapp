@@ -1,0 +1,27 @@
+﻿{
+  "status": "success",
+  "result": [
+    {
+      "projectId": "gamer-chat-23709",
+      "projectNumber": "714020730668",
+      "displayName": "Gamer chat",
+      "name": "projects/gamer-chat-23709",
+      "resources": {
+        "hostingSite": "gamer-chat-23709"
+      },
+      "state": "ACTIVE",
+      "etag": "1_61183bd3-8e43-4558-8d0a-af4eaf712d84"
+    },
+    {
+      "projectId": "poised-beach-312401",
+      "projectNumber": "739414553956",
+      "displayName": "My First Project",
+      "name": "projects/poised-beach-312401",
+      "resources": {
+        "hostingSite": "poised-beach-312401"
+      },
+      "state": "ACTIVE",
+      "etag": "1_9cf45863-2f4f-45d6-8cf4-1ec74c423fd3"
+    }
+  ]
+}

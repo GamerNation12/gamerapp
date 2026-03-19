@@ -22,8 +22,9 @@ try {
 
     admin.initializeApp({
       credential: admin.credential.cert(serviceAccount),
-      databaseURL: "https://gamer-app-10a85-default-rtdb.firebaseio.com"
+      databaseURL: process.env.FIREBASE_DATABASE_URL
     });
+
 
     console.log('Firebase initialized successfully');
   }
